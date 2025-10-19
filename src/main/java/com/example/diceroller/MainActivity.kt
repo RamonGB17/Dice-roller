@@ -1,28 +1,19 @@
-package com.example.diceroller // Asegúrate de que el nombre del paquete coincida con tu proyecto
+package com.example.diceroller
 
 import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.Image
-import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.Spacer
-import androidx.compose.foundation.layout.fillMaxSize
-import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.wrapContentSize
+import androidx.compose.foundation.layout.*
 import androidx.compose.material3.Button
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue // Importación para el delegate 'by'
-import androidx.compose.runtime.mutableStateOf // Importación para el manejo de estado
-import androidx.compose.runtime.remember // Importación para el manejo de estado
-import androidx.compose.runtime.setValue // Importación para el delegate 'by'
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import com.example.diceroller.R
 import com.example.diceroller.ui.theme.DiceRollerTheme
 
 class MainActivity : ComponentActivity() {
@@ -36,66 +27,89 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-// ------------------------------------------------------------------
-
-/**
- * Función principal y punto de entrada de la aplicación Dice Roller.
- */
 @Preview
 @Composable
 fun DiceRollerApp() {
-    DiceWithButtonAndImage(
+    DiceWithTwoDiceAndButtons(
         modifier = Modifier
             .fillMaxSize()
             .wrapContentSize(Alignment.Center)
     )
 }
 
-// ------------------------------------------------------------------
-
-/**
- * Función que contiene la lógica, el estado y el diseño de la app.
- *
- * @param modifier Modificador heredado para la alineación y el tamaño.
- */
 @Composable
-fun DiceWithButtonAndImage(modifier: Modifier = Modifier) {
-    // 1. Manejo del Estado (Lógica del dado)
-    // Inicializa el resultado del dado en 1 y permite que se active la recomposición al cambiar
-    var result by remember { mutableStateOf(1) }
+fun DiceWithTwoDiceAndButtons(modifier: Modifier = Modifier) {
+    var dice1Result by remember { mutableStateOf(1) }
+    var dice2Result by remember { mutableStateOf(1) }
+    var showSecondDice by remember { mutableStateOf(true) }
 
-    // Lógica condicional para mapear el resultado al recurso de imagen
-    val imageResource = when (result) {
-        1 -> R.drawable.dice_1
-        2 -> R.drawable.dice_2
-        3 -> R.drawable.dice_3
-        4 -> R.drawable.dice_4
-        5 -> R.drawable.dice_5
-        else -> R.drawable.dice_6
+    // Función auxiliar para obtener la imagen del dado según el valor
+    fun diceImageFor(value: Int): Int {
+        return when (value) {
+            1 -> R.drawable.dice_1
+            2 -> R.drawable.dice_2
+            3 -> R.drawable.dice_3
+            4 -> R.drawable.dice_4
+            5 -> R.drawable.dice_5
+            else -> R.drawable.dice_6
+        }
     }
 
-    // Contenedor de diseño vertical (Columna)
     Column(
         modifier = modifier,
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        // 2. Imagen del dado
-        Image(
-            // El 'painter' ahora usa el recurso de imagen dinámico
-            painter = painterResource(imageResource),
-            // La descripción de contenido refleja el valor actual del dado
-            contentDescription = result.toString()
-        )
-
-        // Espaciador entre la imagen y el botón
-        Spacer(modifier = Modifier.height(16.dp))
-
-        // 3. Botón de lanzamiento
-        Button(
-            // Al hacer clic, se actualiza la variable 'result' con un número aleatorio entre 1 y 6
-            onClick = { result = (1..6).random() }
+        // Mostrar los dados (el segundo solo si showSecondDice es true)
+        Row(
+            horizontalArrangement = Arrangement.Center
         ) {
-            Text(stringResource(R.string.roll))
+            Image(
+                painter = painterResource(diceImageFor(dice1Result)),
+                contentDescription = dice1Result.toString(),
+                modifier = Modifier.size(100.dp)
+            )
+
+            Spacer(modifier = Modifier.width(16.dp))
+
+            if (showSecondDice) {
+                Image(
+                    painter = painterResource(diceImageFor(dice2Result)),
+                    contentDescription = dice2Result.toString(),
+                    modifier = Modifier.size(100.dp)
+                )
+            }
         }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Botón 1: lanza solo el primer dado
+        Button(onClick = {
+            dice1Result = (1..6).random()
+            showSecondDice = false
+        }) {
+            Text(stringResource(R.string.roll_one_dice))
+        }
+
+        Spacer(modifier = Modifier.height(12.dp))
+
+        // Botón 2: lanza los dos dados
+        Button(onClick = {
+            dice1Result = (1..6).random()
+            dice2Result = (1..6).random()
+            showSecondDice = true
+        }) {
+            Text(stringResource(R.string.roll_two_dice))
+        }
+
+        Spacer(modifier = Modifier.height(24.dp))
+
+        // Mostrar el número de puntos de la tirada
+        Text(
+            text = if (showSecondDice) {
+                stringResource(R.string.result_two, dice1Result + dice2Result)
+            } else {
+                stringResource(R.string.result_one, dice1Result)
+            }
+        )
     }
 }
