@@ -1,4 +1,7 @@
 <resources>
     <string name="app_name">Dice Roller</string>
-    <string name="roll">Roll</string>
+    <string name="roll_one_dice">Lanzar un dado</string>
+    <string name="roll_two_dice">Lanzar dos dados</string>
+    <string name="result_one">Resultado: %1$d puntos</string>
+    <string name="result_two">Total: %1$d puntos</string>
 </resources>
